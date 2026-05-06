@@ -1,4 +1,5 @@
 import {
+  Float,
   Html,
   OrbitControls,
   PivotControls,
@@ -50,15 +51,17 @@ export const Experience = () => {
       </mesh>
 
       <Suspense fallback={null}>
-        <Text
-          font="./bangers-v20-latin-regular.woff"
-          fontSize={1}
-          color="salmon"
-          position-y={2}
-          textAlign="center"
-        >
-          I love R3F
-        </Text>
+        <Float floatIntensity={2} rotationIntensity={2}>
+          <Text
+            font="./bangers-v20-latin-regular.woff"
+            fontSize={1}
+            color="salmon"
+            position-y={2}
+            textAlign="center"
+          >
+            I love R3F
+          </Text>
+        </Float>
       </Suspense>
     </>
   );
