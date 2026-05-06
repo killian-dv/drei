@@ -1,13 +1,16 @@
 import {
+  Html,
   OrbitControls,
   PivotControls,
+  Text,
   TransformControls,
 } from "@react-three/drei";
-import { useRef } from "react";
+import { Suspense, useRef } from "react";
 import { Mesh } from "three";
 
 export const Experience = () => {
   const cube = useRef<Mesh>(null!);
+  const sphere = useRef<Mesh>(null!);
   return (
     <>
       <OrbitControls makeDefault />
@@ -20,9 +23,18 @@ export const Experience = () => {
         lineWidth={4}
         axisColors={["#9381ff", "#ff4d6d", "#7ae582"]}
       >
-        <mesh position-x={-2}>
+        <mesh ref={sphere} position-x={-2}>
           <sphereGeometry />
           <meshStandardMaterial color="orange" />
+          <Html
+            position={[1, 1, 0]}
+            center
+            wrapperClass="label"
+            distanceFactor={8}
+            occlude={[sphere, cube]}
+          >
+            That's a sphere 👍
+          </Html>
         </mesh>
       </PivotControls>
 
@@ -36,6 +48,18 @@ export const Experience = () => {
         <planeGeometry />
         <meshStandardMaterial color="greenyellow" />
       </mesh>
+
+      <Suspense fallback={null}>
+        <Text
+          font="./bangers-v20-latin-regular.woff"
+          fontSize={1}
+          color="salmon"
+          position-y={2}
+          textAlign="center"
+        >
+          I love R3F
+        </Text>
+      </Suspense>
     </>
   );
 };

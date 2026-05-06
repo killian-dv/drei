@@ -9,3 +9,14 @@ body,
   overflow: hidden;
   background: ivory;
 }
+
+.label > div {
+  font-family: "Helvetica", sans-serif;
+  position: absolute;
+  background-color: #00000088;
+  color: #fff;
+  padding: 15px;
+  border-radius: 30px;
+  white-space: nowrap;
+  user-select: none;
+}
