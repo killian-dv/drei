@@ -1,65 +1,68 @@
-# First React Three Fiber Application — Three.js Journey
+# Drei Essentials — Three.js Journey
 
-Quick recap of the **First React Three Fiber Application** lesson from [Three.js Journey](https://threejsjourney.com/) by Bruno Simon.
+Quick recap of the **Drei** lesson from [Three.js Journey](https://threejsjourney.com/) by Bruno Simon.
 
 ## What this project covers
 
-This project is an introduction to [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction): a React renderer for Three.js. Instead of imperative `scene`, `renderer`, and `animate` boilerplate in plain JavaScript, the scene is built with JSX components that map to Three.js objects. The lesson focuses on hooks for the render loop (`useFrame`), access to Three.js internals (`useThree`), camera controls declared as components (`OrbitControls`), and constructing geometry from typed arrays.
+This project explores [@react-three/drei](https://github.com/pmndrs/drei): a helper library that adds production-ready abstractions on top of React Three Fiber. Instead of wiring every utility by hand, the scene uses reusable components for camera controls, gizmos, reflections, text rendering, HTML overlays, and subtle motion effects.
 
-- **Declarative scenes** — meshes, lights, geometries, and materials expressed as JSX.
-- **`Canvas` bootstrap** — a single `<Canvas>` configures the WebGL context, scene, camera, and render loop integration with React.
-- **Animation hook** — `useFrame` runs code every tick (FPS-aware with `delta`) to rotate objects or tweak the camera over time.
-- **Controls integration** — `extend` pulls classic Three.js classes (like `OrbitControls`) into the R3F component tree as `<OrbitControls />`.
-- **Custom geometry** — a `bufferGeometry` with a `bufferAttribute` for vertex positions plus `computeVertexNormals()` for lighting on non-indexed meshes.
+- **Drei helper components** — ready-made building blocks to speed up common 3D tasks.
+- **Interactive controls** — `OrbitControls`, `PivotControls`, and `TransformControls` for camera and object manipulation.
+- **Visual enhancements** — `MeshReflectorMaterial` for a reflective floor and `Float` for lightweight motion.
+- **DOM in 3D** — `Html` to render a screen-space label that can be occluded by meshes.
+- **Async text rendering** — `Text` wrapped in `Suspense` for font loading without blocking the scene.
 
 ## What I built
 
-- Bootstrapped a Vite + React + TypeScript app with `@react-three/fiber` and `three`.
-- Wrapped the scene in `<Canvas>` and setcamera parameters (`fov`, `near`, `far`, initial `position`) via props instead of constructing a `PerspectiveCamera` by hand.
+- Bootstrapped a Vite + React + TypeScript app with `@react-three/fiber`, `three`, and `@react-three/drei`.
+- Wrapped the scene in `<Canvas>` and configured camera parameters (`fov`, `near`, `far`, and initial `position`) directly via props.
 - Composed `<Experience />` containing:
-  - `<OrbitControls args={[camera, gl.domElement]} />` wired with `camera` and the canvas DOM element from `useThree()`.
-  - `ambientLight` and `directionalLight` for simple, readable lighting.
-  - A `<group>` with a sphere and a purple box scaled and positioned with short-hand props (`position-x`, `scale`, `rotation-y`).
-  - A ground-like `<mesh>` (`planeGeometry` rotated to lie horizontally) scaled for a visible floor plane.
-  - A `<CustomObject />` triangle mesh built from a `Float32Array` of random vertex positions, `bufferAttribute attach="attributes-position"`, normals computed after mount with `geometry.computeVertexNormals()`, and `DoubleSide` on the standard material so the mesh is lit from either side during development.
-- Used `useRef` + R3F’s `attach`/`ref` pattern to mutate mesh rotation inside `useFrame` (cube spinning on **Y**) while keeping React’s declarative tree for structure.
-- Left commented experiments in code for circling the camera with `elapsedTime`, rotating the entire group, and similar patterns from the lesson.
+  - `<OrbitControls makeDefault />` for free camera navigation.
+  - `ambientLight` and `directionalLight` for clear baseline lighting.
+  - A sphere inside `<PivotControls>` so it can be moved with a visual pivot gizmo.
+  - A cube referenced with `useRef`, then connected to `<TransformControls object={cube} />` for translation/rotation/scale edits.
+  - A large floor plane using `MeshReflectorMaterial` to create glossy mirror-like reflections.
+  - An `Html` annotation attached near the sphere (`wrapperClass="label"`) with occlusion against both the sphere and cube.
+  - A floating `Text` object inside `Suspense` + `Float`, using a local font file for stylized typography.
+- Styled the full-screen canvas and HTML label in `index.css` to keep the scene immersive and readable.
+- Kept the scene clean and declarative while relying on drei utilities instead of manual Three.js setup code.
 
 ## What I learned
 
-### 1) How React Three Fiber fits Three.js into React
+### 1) Why drei matters on top of React Three Fiber
 
-- R3F is not an alternative physics or game engine—it is Three.js orchestrated through React reconciliation.
-- JSX elements map to constructors and setter-style updates on Three objects, so naming stays familiar (`mesh`, `sphereGeometry`, `meshStandardMaterial`).
+- React Three Fiber gives the rendering foundation, while drei provides higher-level tools that reduce boilerplate and speed up iteration.
+- Many scene features that would be long to implement manually become declarative one-liners.
 
-### 2) Why `<Canvas>` replaces a lot of setup code
+### 2) How camera and object controls complement each other
 
-- The canvas creates the renderer and scene lifecycle and ties them to React Strict Mode-friendly patterns.
-- Camera defaults can still be overridden with a `camera` prop object matching what you would configure in vanilla Three.js.
+- `OrbitControls` handles camera navigation globally.
+- `PivotControls` and `TransformControls` make object manipulation interactive, which is great for layout and debugging in 3D space.
 
-### 3) How `useFrame` differs from raw `requestAnimationFrame`
+### 3) How refs bridge declarative and imperative patterns
 
-- Callbacks receive the shared `state` (clock, viewport, scene, camera, etc.) plus `delta`, which makes frame-rate-independent motion straightforward (`rotation += delta`).
-- It runs inside the same render loop managed by Fiber, avoiding manual sync between React UI and Three.js.
+- `TransformControls` expects a Three.js object reference; `useRef<Mesh>()` is the clean bridge from JSX to imperative APIs.
+- This pattern is common when integrating advanced helpers that need direct object handles.
 
-### 4) What `useThree` is for
+### 4) What `Html` solves in mixed UI scenes
 
-- It exposes `camera`, `gl`, `scene`, and other singletons inside components that descend from `<Canvas>`.
-- Passing `camera` and `gl.domElement` into `OrbitControls` mirrors the imperative example from earlier lessons—a small bridge pattern worth remembering.
+- `Html` lets me place regular DOM content at a 3D position without building custom shaders or textures.
+- Occlusion support (`occlude`) keeps labels believable by hiding them behind geometry when needed.
 
-### 5) How to register non-core classes (`extend`)
+### 5) How `MeshReflectorMaterial` upgrades a simple floor
 
-- Classes from `examples/jsm`—like `OrbitControls`—are not known to R3F out of the box.
-- Calling `extend(ThreeOrbitControls)` lets me write `<OrbitControls />` alongside native primitives and reuse the familiar API with `args` for constructor parameters.
+- A basic plane becomes a polished reflective surface with a few parameters (`blur`, `mirror`, `resolution`).
+- It adds depth and visual quality with very little code compared to writing a custom reflection pipeline.
 
-### 6) How short-hand JSX props relate to vectors and Euler angles
+### 6) Why `Suspense` is useful with drei text/font assets
 
-- Props such as `position-x` or `rotation-y` are ergonomic sugar for translating or rotating meshes without allocating `Vector3` / `Euler` in React state for simple cases.
+- `Text` can depend on font loading, so wrapping it in `Suspense` avoids rendering glitches during async asset fetches.
+- This keeps the scene stable while resources initialize.
 
-### 7) Basics of programmatic geometry in R3F
+### 7) How small motion effects improve scene readability
 
-- `bufferGeometry` + `bufferAttribute` is the same data model as in vanilla Three.js; R3F’s `attach` connects child nodes to parent attributes.
-- After generating positions (here, random floats), normals often need recomputation (`computeVertexNormals`) so `MeshStandardMaterial` shading looks correct unless you supply normals yourself.
+- `Float` adds subtle animation with configurable intensity, making static content feel more alive.
+- Utility components like this help polish presentation without maintaining a custom animation loop for every element.
 
 ## Run the project
 
