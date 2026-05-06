@@ -1,15 +1,9 @@
-import { extend, useThree } from "@react-three/fiber";
-import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-
-const OrbitControls = extend(ThreeOrbitControls);
+import { OrbitControls } from "@react-three/drei";
 
 export const Experience = () => {
-  const { camera, gl } = useThree();
-
   return (
     <>
-      <OrbitControls args={[camera, gl.domElement]} />
-
+      <OrbitControls />
       <directionalLight position={[1, 2, 3]} intensity={4.5} />
       <ambientLight intensity={1.5} />
 
